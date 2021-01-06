@@ -1,11 +1,21 @@
-
 import java.io.File;
 
 public class Main {
-	public static void main(String[] args) {
-		
-		String res = new PdfToWord().pdftoword("K:\\ÃæÊÔ\\ÃæÊÔÌâ\\Java ĞéÄâ»úÃæÊÔÌâÈ«Ãæ½âÎö.pdf");
-		System.out.println(res);
-	}
-	
+    public static void main(String[] args) {
+        if (args.length == 1) {
+            String path = args[0];
+
+            // æ£€æŸ¥æ–‡ä»¶æ˜¯å¦å­˜åœ¨
+            File f = new File(path);
+            if (f.exists() && !f.isDirectory()) {
+                String res = new PdfToWord().pdftoword(path);
+                System.out.println("\n" + path + "\n -> " + res);
+            } else {
+                System.out.println("é”™è¯¯ï¼šæ–‡ä»¶ '" + path + "' ä¸å­˜åœ¨");
+            }
+
+        } else {
+            System.out.println("è¯·ä¼ å…¥ä¸€ä¸ª PDF æ–‡ä»¶çš„è·¯å¾„ï¼");
+        }
+    }
 }

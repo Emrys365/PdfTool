@@ -1,6 +1,7 @@
 
 
 import java.io.File;
+import java.util.Locale;
 
 import com.spire.pdf.FileFormat;
 import com.spire.pdf.PdfDocument;
@@ -9,100 +10,107 @@ import com.spire.pdf.widget.PdfPageCollection;
 
 public class PdfToWord {
 
-	// Éæ¼°µ½µÄÂ·¾¶
-	// 1¡¢pdfËùÔÚµÄÂ·¾¶£¬ÕæÊµ²âÊÔÖÖÊÇ´ÓÍâ²¿ÒıÈëµÄ
+    // æ¶‰åŠåˆ°çš„è·¯å¾„
+    // 1ã€pdfæ‰€åœ¨çš„è·¯å¾„ï¼ŒçœŸå®æµ‹è¯•ç§æ˜¯ä»å¤–éƒ¨å¼•å…¥çš„
 
-	// 2¡¢Èç¹ûÊÇ´óÎÄ¼ş£¬ĞèÒª½øĞĞÇĞ·Ö£¬±£´æµÄ×ÓpdfÂ·¾¶
-	 String splitPath = "./split/";
-	
-	// 3¡¢Èç¹ûÊÇ´óÎÄ¼ş£¬ĞèÒª¶Ô×ÓpdfÎÄ¼şÒ»¸öÒ»¸ö½øĞĞ×ª»¯
-	 String docPath = "./doc/";
+    // 2ã€å¦‚æœæ˜¯å¤§æ–‡ä»¶ï¼Œéœ€è¦è¿›è¡Œåˆ‡åˆ†ï¼Œä¿å­˜çš„å­pdfè·¯å¾„
+     String splitPath = "./split/";
 
-	public  String pdftoword(String  srcPath) {
-		// 4¡¢×îÖÕÉú³ÉµÄdocËùÔÚµÄÄ¿Â¼£¬Ä¬ÈÏÊÇºÍÒıÈëµÄÒ»¸öµØ·½£¬¿ªÔ´Ê±¶ÔÍâÌá¹©ÏÂÔØµÄ½Ó¿Ú¡£
-		String desPath = srcPath.substring(0, srcPath.length()-4)+".docx";
-		boolean result = false;
-		try {
-			// 0¡¢ÅĞ¶ÏÊäÈëµÄÊÇ·ñÊÇpdfÎÄ¼ş
-			//µÚÒ»²½£ºÅĞ¶ÏÊäÈëµÄÊÇ·ñºÏ·¨
-			boolean flag = isPDFFile(srcPath);
-			//µÚ¶ş²½£ºÔÚÊäÈëµÄÂ·¾¶ÏÂĞÂ½¨ÎÄ¼ş¼Ğ
-			boolean flag1 = create();
-			
-			if (flag && flag1) {
-				// 1¡¢¼ÓÔØpdf
-				PdfDocument pdf = new PdfDocument();
-				pdf.loadFromFile(srcPath);
-				PdfPageCollection num = pdf.getPages();
-				
-				// 2¡¢Èç¹ûpdfµÄÒ³ÊıĞ¡ÓÚ11£¬ÄÇÃ´Ö±½Ó½øĞĞ×ª»¯
-				if (num.getCount() <= 10) {
-					pdf.saveToFile(desPath, com.spire.pdf.FileFormat.DOCX);
-				}
-				// 3¡¢·ñÔòÊäÈëµÄÒ³Êı±È½Ï¶à£¬¾Í¿ªÊ¼½øĞĞÇĞ·ÖÔÙ×ª»¯
-				else {	
-					// µÚÒ»²½£º½«Æä½øĞĞÇĞ·Ö,Ã¿Ò³Ò»ÕÅpdf
-					pdf.split(splitPath+"test{0}.pdf",0);
-					
-					// µÚ¶ş²½£º½«ÇĞ·ÖµÄpdf£¬Ò»¸öÒ»¸ö½øĞĞ×ª»»
-					File[] fs = getSplitFiles(splitPath);
-					for(int i=0;i<fs.length;i++) {
-						PdfDocument sonpdf = new PdfDocument();
-						sonpdf.loadFromFile(fs[i].getAbsolutePath());
-						sonpdf.saveToFile(docPath+fs[i].getName().substring(0, fs[i].getName().length()-4)+".docx",FileFormat.DOCX);
-					}
-					//µÚÈı²½£º¶Ô×ª»¯µÄdocÎÄµµ½øĞĞºÏ²¢£¬ºÏ²¢³ÉÒ»¸ö´óµÄword
-					try {
-						result = MergeWordDocument.merge(docPath, desPath); 
-						System.out.println(result);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					
-				}
-			} else {
-				System.out.println("ÊäÈëµÄ²»ÊÇpdfÎÄ¼ş");
-				return "ÊäÈëµÄ²»ÊÇpdfÎÄ¼ş";
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}finally {
-			//4¡¢°Ñ¸Õ¸Õ»º´æµÄsplitºÍdocÉ¾³ı
-			if(result==true) {
-				new FileDeleteTest().clearFiles(splitPath);
-				new FileDeleteTest().clearFiles(docPath);
-			}
-		}
-		return "×ª»»³É¹¦";
-	}
+    // 3ã€å¦‚æœæ˜¯å¤§æ–‡ä»¶ï¼Œéœ€è¦å¯¹å­pdfæ–‡ä»¶ä¸€ä¸ªä¸€ä¸ªè¿›è¡Œè½¬åŒ–
+     String docPath = "./doc/";
+
+    public  String pdftoword(String  srcPath) {
+        // 4ã€æœ€ç»ˆç”Ÿæˆçš„docæ‰€åœ¨çš„ç›®å½•ï¼Œé»˜è®¤æ˜¯å’Œå¼•å…¥çš„ä¸€ä¸ªåœ°æ–¹ï¼Œå¼€æºæ—¶å¯¹å¤–æä¾›ä¸‹è½½çš„æ¥å£ã€‚
+        String desPath = srcPath.substring(0, srcPath.length()-4)+".docx";
+        System.out.println("\n => " + desPath);
+        boolean result = false;
+        try {
+            // 0ã€åˆ¤æ–­è¾“å…¥çš„æ˜¯å¦æ˜¯pdfæ–‡ä»¶
+            //ç¬¬ä¸€æ­¥ï¼šåˆ¤æ–­è¾“å…¥çš„æ˜¯å¦åˆæ³•
+            boolean flag = isPDFFile(srcPath);
+            //ç¬¬äºŒæ­¥ï¼šåœ¨è¾“å…¥çš„è·¯å¾„ä¸‹æ–°å»ºæ–‡ä»¶å¤¹
+            boolean flag1 = create();
+
+            if (flag && flag1) {
+                // 0ã€å°†è¯­è¨€è®¾ç½®ä¸ºä¸­æ–‡ï¼Œä»¥å¤„ç† PDF ä¸­å¯èƒ½å­˜åœ¨çš„ä¸­æ–‡å­—ç¬¦
+                Locale locale = new Locale("zh", "CN");
+                Locale.setDefault(locale);
+
+                // 1ã€åŠ è½½pdf
+                PdfDocument pdf = new PdfDocument();
+                pdf.loadFromFile(srcPath);
+                PdfPageCollection num = pdf.getPages();
+
+                // 2ã€å¦‚æœpdfçš„é¡µæ•°å°äº11ï¼Œé‚£ä¹ˆç›´æ¥è¿›è¡Œè½¬åŒ–
+                if (num.getCount() <= 10) {
+                    pdf.saveToFile(desPath, com.spire.pdf.FileFormat.DOCX);
+                }
+                // 3ã€å¦åˆ™è¾“å…¥çš„é¡µæ•°æ¯”è¾ƒå¤šï¼Œå°±å¼€å§‹è¿›è¡Œåˆ‡åˆ†å†è½¬åŒ–
+                else {
+                    // ç¬¬ä¸€æ­¥ï¼šå°†å…¶è¿›è¡Œåˆ‡åˆ†,æ¯é¡µä¸€å¼ pdf
+                    pdf.split(splitPath+"test{0}.pdf",0);
+                    pdf.close();
+
+                    // ç¬¬äºŒæ­¥ï¼šå°†åˆ‡åˆ†çš„pdfï¼Œä¸€ä¸ªä¸€ä¸ªè¿›è¡Œè½¬æ¢
+                    File[] fs = getSplitFiles(splitPath);
+                    for(int i=0;i<fs.length;i++) {
+                        PdfDocument sonpdf = new PdfDocument();
+                        sonpdf.loadFromFile(fs[i].getAbsolutePath());
+                        sonpdf.saveToFile(docPath+fs[i].getName().substring(0, fs[i].getName().length()-4)+".docx",FileFormat.DOCX);
+                        sonpdf.close();
+                    }
+                    //ç¬¬ä¸‰æ­¥ï¼šå¯¹è½¬åŒ–çš„docæ–‡æ¡£è¿›è¡Œåˆå¹¶ï¼Œåˆå¹¶æˆä¸€ä¸ªå¤§çš„word
+                    try {
+                        result = MergeWordDocument.merge(docPath, desPath);
+                        System.out.println(result);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            } else {
+                System.out.println("è¾“å…¥çš„ä¸æ˜¯pdfæ–‡ä»¶");
+                return "è¾“å…¥çš„ä¸æ˜¯pdfæ–‡ä»¶";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //4ã€æŠŠåˆšåˆšç¼“å­˜çš„splitå’Œdocåˆ é™¤
+            if(result==true) {
+                new FileDeleteTest().clearFiles(splitPath);
+                new FileDeleteTest().clearFiles(docPath);
+            }
+        }
+        return "è½¬æ¢æˆåŠŸ";
+    }
 
 
-	private  boolean create() {
-		File f = new File(splitPath);
-		File f1 = new File(docPath);
-		if(!f.exists() )  f.mkdirs();
-		if(!f.exists() )  f1.mkdirs();
-		return true;	    
-	}
+    private  boolean create() {
+        File f = new File(splitPath);
+        File f1 = new File(docPath);
+        if(!f.exists() )  f.mkdirs();
+        if(!f.exists() )  f1.mkdirs();
+        return true;
+    }
 
-	// ÅĞ¶ÏÊÇ·ñÊÇpdfÎÄ¼ş
-	private  boolean isPDFFile(String srcPath2) {
-		File file = new File(srcPath2);
-		String filename = file.getName();
-		if (filename.endsWith(".pdf")) {
-			return true;
-		}
-		return false;
-	}
+    // åˆ¤æ–­æ˜¯å¦æ˜¯pdfæ–‡ä»¶
+    private  boolean isPDFFile(String srcPath2) {
+        File file = new File(srcPath2);
+        String filename = file.getName();
+        if (filename.endsWith(".pdf")) {
+            return true;
+        }
+        return false;
+    }
 
-	// È¡µÃÄ³Ò»Â·¾¶ÏÂËùÓĞµÄpdf
-	private  File[] getSplitFiles(String path) {
-		File f = new File(path);
-		File[] fs = f.listFiles();
-		if (fs == null) {
-			return null;
-		}
-		return fs;
-	}
+    // å–å¾—æŸä¸€è·¯å¾„ä¸‹æ‰€æœ‰çš„pdf
+    private  File[] getSplitFiles(String path) {
+        File f = new File(path);
+        File[] fs = f.listFiles();
+        if (fs == null) {
+            return null;
+        }
+        return fs;
+    }
 
 }
